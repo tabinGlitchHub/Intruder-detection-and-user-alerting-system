@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 import methods as tools
-import face_recognition as face_rec
 
 thres = 0.60  # Threshold to detect object/ Confidence Score
 
@@ -16,9 +15,15 @@ classFile = 'coco.names'
 with open(classFile, 'rt') as f:
     classNames = f.read().rstrip('\n').split('\n')
 
+friends = ['aditya', 'sidhant', 'tabin']
+features = 'features.npy'
+labels = np.load('labels.npy')
 config_path = 'ssd_mobilenet_v3_large_coco_2020_01_14.pbtxt'
 weights_path = 'frozen_inference_graph.pb'
 haar_caascade = cv2.CascadeClassifier('haar_cascade.xml')
+
+face_recognizer = cv2.face.LBPHFaceRecognizer_create()
+face_recognizer.read('face_trained.yml')
 
 # assign neural net
 net = cv2.dnn_DetectionModel(weights_path, config_path)
@@ -46,7 +51,11 @@ while True:
         if classIds[0] == 1:
             gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
             faces_rects = haar_caascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=3)
+            # draw rectangle around detected face and label name
             for (x, y, w, h) in faces_rects:
+                face_roi = gray[y:y+h, x:x+w]
+                label, confidence = face_recognizer.predict(face_roi)
+                cv2.putText(img, str(friends[label]).upper(),(x, y), cv2.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 255), thickness=2)
                 cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), thickness=2)
 
     cv2.imshow("Output", tools.resizewin(img))  # tools.resizewin(img) to resize window
