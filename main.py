@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 import methods as tools
 import face_recognition as face_rec
 
@@ -43,7 +44,8 @@ while True:
 
         # if person detected, detect and recognize face
         if classIds[0] == 1:
-            faces_rects = haar_caascade.detectMultiScale(img, scaleFactor=1.1, minNeighbors=3)
+            gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+            faces_rects = haar_caascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=3)
             for (x, y, w, h) in faces_rects:
                 cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), thickness=2)
 
