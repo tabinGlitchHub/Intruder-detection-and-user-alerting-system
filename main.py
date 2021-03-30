@@ -16,8 +16,8 @@ with open(classFile, 'rt') as f:
     classNames = f.read().rstrip('\n').split('\n')
 
 friends = ['aditya', 'sidhant', 'tabin']
-features = 'features.npy'
-labels = np.load('labels.npy')
+# features = np.load('features.npy', allow_pickle=True)
+# labels = np.load('labels.npy')
 config_path = 'ssd_mobilenet_v3_large_coco_2020_01_14.pbtxt'
 weights_path = 'frozen_inference_graph.pb'
 haar_caascade = cv2.CascadeClassifier('haar_cascade.xml')
@@ -49,20 +49,22 @@ while True:
 
         # if person detected, detect and recognize face
         if classIds[0] == 1:
-            gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             faces_rects = haar_caascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=3)
             # draw rectangle around detected face and label name
             for (x, y, w, h) in faces_rects:
-                face_roi = gray[y:y+h, x:x+w]
+                face_roi = gray[y:y + h, x:x + w]
                 label, confidence = face_recognizer.predict(face_roi)
-                cv2.putText(img, str(friends[label]).upper(),(x, y), cv2.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 255), thickness=2)
+                cv2.putText(img, str(friends[label]).upper(), (x, y), cv2.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 255),
+                            thickness=2)
+                # print(f'{friends[label]} with confidece:{confidence}')
                 cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), thickness=2)
 
     cv2.imshow("Output", tools.resizewin(img))  # tools.resizewin(img) to resize window
-    print(classIds, bbox)
+    # print(classIds, bbox)1
 
     # waitkey(millisecond of delay between frames) and break loop if x is pressed
-    if cv2.waitKey(20) & 0xFF == ord('x'):
+    if cv2.waitKey(1) & 0xFF == ord('x'):
         break
 
 cap.release()

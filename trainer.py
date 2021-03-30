@@ -17,21 +17,23 @@ def train():
         path = os.path.join(DIR, friend)
         label = friends.index(friend)
 
-    for img in os.listdir(path):
-        img_path = os.path.join(path, img)
+        for img in os.listdir(path):
+            img_path = os.path.join(path, img)
 
-        img_array = cv.imread(img_path)
-        gray = cv.cvtColor(img_array, cv.COLOR_BGR2GRAY)
+            img_array = cv.imread(img_path)
+            gray = cv.cvtColor(img_array, cv.COLOR_BGR2GRAY)
 
-        faces_rect = haar_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=3)
+            faces_rect = haar_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=3)
 
-        for (x, y, h, w) in faces_rect:
-            faces_roi = gray[y:y + h, x:x + w]
-            features.append(faces_roi)
-            labels.append(label)
+            for (x, y, h, w) in faces_rect:
+                faces_roi = gray[y:y + h, x:x + w]
+                features.append(faces_roi)
+                labels.append(label)
 
 
 train()
+print(f'features:{len(features)}')
+print(f'labels:{len(labels)}')
 print('-------Training Done-------')
 
 features = np.array(features, dtype='object')
