@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import methods as tools
+import gsmxs
 
 thres = 0.60  # Threshold to detect object/ Confidence Score
 
@@ -15,9 +16,9 @@ classFile = 'coco.names'
 with open(classFile, 'rt') as f:
     classNames = f.read().rstrip('\n').split('\n')
 
-friends = ['aditya', 'sidhant', 'tabin']
-# features = np.load('features.npy', allow_pickle=True)
-# labels = np.load('labels.npy')
+friends = ['aditya', 'tabin', 'sidhant', 'stranger']
+features = np.load('features.npy', allow_pickle=True)
+labels = np.load('labels.npy')
 config_path = 'ssd_mobilenet_v3_large_coco_2020_01_14.pbtxt'
 weights_path = 'frozen_inference_graph.pb'
 haar_caascade = cv2.CascadeClassifier('haar_cascade.xml')
@@ -35,6 +36,32 @@ net.setInputSwapRB(True)
 # Change resolution
 # tools.changeres(cap, 400, 400)
 
+################### To Scan In an Image###########################
+# frame = cv2.imread('Images/aditya/aditya3.jpeg')
+# classIds, confs, bbox = net.detect(frame, confThreshold=thres)
+#
+# if len(classIds) != 0:
+#     for classId, confidence, box in zip(classIds.flatten(), confs.flatten(), bbox):
+#         cv2.rectangle(frame, box, color=(0, 255, 0), thickness=2)
+#         cv2.putText(frame, classNames[classId - 1].upper(), (box[0] + 10, box[1] + 30),
+#                     cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
+#         cv2.putText(frame, str(round(confidence * 100, 2)), (box[0] + 200, box[1] + 30),
+#                     cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
+#
+#     # if person detected, detect and recognize face
+#     if classIds[0] == 1:
+#         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+#         faces_rects = haar_caascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=3)
+#         # draw rectangle around detected face and label name
+#         for (x, y, w, h) in faces_rects:
+#             face_roi = gray[y:y + h, x:x + w]
+#             label, confidence = face_recognizer.predict(face_roi)
+#             cv2.putText(frame, str(friends[label]).upper(), (x, y), cv2.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 255),
+#                         thickness=2)
+#             # print(f'{friends[label]} with confidece:{confidence}')
+#             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), thickness=2)
+
+################### To Scan In a VideoFeed ###########################
 while True:
     success, img = cap.read()
     classIds, confs, bbox = net.detect(img, confThreshold=thres)
@@ -55,17 +82,24 @@ while True:
             for (x, y, w, h) in faces_rects:
                 face_roi = gray[y:y + h, x:x + w]
                 label, confidence = face_recognizer.predict(face_roi)
-                cv2.putText(img, str(friends[label]).upper(), (x, y), cv2.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 255),
-                            thickness=2)
-                # print(f'{friends[label]} with confidece:{confidence}')
-                cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), thickness=2)
+                if label < len(friends):
+                    cv2.putText(img, str(friends[label]).upper(), (x, y), cv2.FONT_HERSHEY_COMPLEX, 1.0, (0, 255, 0),
+                                thickness=2)
+                    # print(f'{friends[label]} with confidece:{confidence}')
+                    cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), thickness=2)
+                else:
+                    cv2.putText(img, "INTRUDER", (x, y), cv2.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 255),
+                                thickness=2)
+                    gsmxs.send_sms('9870095725', 'INTRUDER DETECTED!');
+                    # print(f'{friends[label]} with confidece:{confidence}')
+                    cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), thickness=2)
 
     cv2.imshow("Output", tools.resizewin(img))  # tools.resizewin(img) to resize window
-    # print(classIds, bbox)1
+    # print(classIds, bbox)
 
     # waitkey(millisecond of delay between frames) and break loop if x is pressed
     if cv2.waitKey(1) & 0xFF == ord('x'):
         break
-
+# cv2.waitKey(0)
 cap.release()
 cv2.destroyAllWindows()
