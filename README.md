@@ -13,11 +13,12 @@ About:
 
 Software Used:
   Packages:
-    - opencv-contrib-python
-    - GSMTC35
-    - numpy
+  - opencv-contrib-python
+  - GSMTC35
+  - numpy
+ 
   IDE:
-    -PyCharm CE
+  - PyCharm CE
     
 Hardware Used:
   - SIM900A module.
